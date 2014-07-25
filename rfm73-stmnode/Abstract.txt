@@ -1,0 +1,29 @@
+The RTX_Blinky project is a simple RTX Kernel based example for the ST 
+'STM32F303VC' microcontroller using ST 'STM32F3-Discovery' Evaluation Board.
+
+Example functionality:
+ - Clock Settings:
+   - XTAL (ST-Link) =    8.00 MHz
+   - SYSCLK         =   72.00 MHz
+
+The simple RTX Kernel based example simulates the step-motor 
+driver. Four LEDs are blinking simulating the activation of 
+the four output driver stages:
+
+
+- phase A
+- phase B
+- phase C
+- phase D
+
+This example simulates Half step driver mode and
+CW rotation direction.
+
+
+The Blinky program is available in different targets:
+
+  STM32F303 Flash:    configured for on-chip Flash
+                      (used for production or target debugging)
+
+  STM32F303 RAM:      configured for on-chip RAM
+                      (used for target debugging)
