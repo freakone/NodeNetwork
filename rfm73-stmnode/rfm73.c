@@ -48,7 +48,7 @@ void RFM73_WAIT_US(char a)
 // Bank0 register initialization values
 #define BANK0_ENTRIES 10
 const unsigned char Bank0_Reg[ BANK0_ENTRIES ][ 2 ]={
-   {  0, 0x0F }, // receive, enabled, CRC 2, enable interupts
+   {  0, 0x3F }, // receive, enabled, CRC 2, enable interupts
    {  1, 0x3F }, // auto-ack on all pipes enabled
    {  2, 0x03 }, // Enable pipes 0 and 1
    {  3, 0x03 }, // 5 bytes addresses
@@ -182,6 +182,8 @@ void rfm73_init_bank1( void ){
         
    rfm73_bank( 1 );
    
+	for(int a = 0; a < 20000; a++); 
+	
    for( i = 0; i <= 8; i++ ){ //reverse!
       for( j = 0; j < 4; j++ ){
          WriteArr[ j ]=( Bank1_Reg0_13[ i ]>>(8*(j) ) )&0xff;
@@ -446,6 +448,18 @@ void rfm73_transmit_message(
    }
    rfm73_buffer_write( RFM73_CMD_W_TX_PAYLOAD, buf, length );
 }
+
+void rfm73_rssi_level(const unsigned char lvl)
+{
+		rfm73_bank(1);
+	
+		unsigned char buff[] = {0x24, 0x02, 0x7F, 0xA6};
+		buff[0] = (lvl << 2);
+		rfm73_buffer_write(5,buff,4);
+		
+		rfm73_bank(0);
+	
+}
     
 void rfm73_transmit_message_once(
    const unsigned char buf[],
@@ -466,18 +480,14 @@ unsigned char rfm73_receive_next_length( void ){
    return rfm73_register_read( RFM73_CMD_R_RX_PL_WID );
 }
 
-unsigned char rfm73_receive(
-   unsigned char * pipe,
-   unsigned char buf[],
-   unsigned char * length
-){
-   unsigned char p = rfm73_receive_next_pipe();
-   if( p == 0x07 ){
-      return 0;
-   }   
-   * pipe = p;
-   * length = rfm73_receive_next_length();
-   rfm73_buffer_read( RFM73_CMD_R_RX_PAYLOAD, buf, * length );
+unsigned char rfm73_receive(unsigned char buf[], unsigned char *length)
+{
+   if(rfm73_receive_fifo_empty())
+			return 0;	
+			   
+   *length = rfm73_receive_next_length();
+   rfm73_buffer_read( RFM73_CMD_R_RX_PAYLOAD, buf, *length );
+	 rfm73_register_write( RFM73_CMD_FLUSH_RX,0 ); 
    return 1;
 }
     
@@ -495,7 +505,6 @@ void rfm73_init( void ){
 	 SPI2->CR2 |= SPI_CR2_DS_0 | SPI_CR2_DS_1 | SPI_CR2_DS_2 | SPI_CR2_FRXTH;
    SPI2->CR1 |= SPI_CR1_SPE;
 
-	
 
 	 RFM73_CE( 0 );
    RFM73_CSN( 1 );

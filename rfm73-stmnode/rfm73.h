@@ -751,11 +751,8 @@ unsigned char rfm73_receive_next_length( void );
 //! RFM73_MAX_PACKET_LEN (32).
 //! 
 //! The RFM73 must be in transmit mode.
-unsigned char rfm73_receive(
-   unsigned char * pipe,
-   unsigned char buf[],
-   unsigned char * length
-);
+unsigned char rfm73_receive(unsigned char buf[], unsigned char * length);
 
+void rfm73_rssi_level(const unsigned char lvl);
 
 #endif

@@ -99,16 +99,16 @@ def buffer_read(reg, len):
 	return val
 	
 def register_write(reg, val):
-
-	print reg, val
 	RPIO.output(CSN, False)
 	if reg < 0x20:
 		reg |= 0x20
-	
 	spi.xfer2([reg])
 	if type(val) in (tuple, list):
 		for entry in val:
 			spi.xfer2([entry])
+	elif type(val) == str:
+		for entry in val:
+			spi.xfer2([ord(entry)])
 	else:
 		spi.xfer2([val])
 	RPIO.output(CSN, True)
@@ -149,13 +149,9 @@ def transmit_mode():
 	register_write( RFM73_REG_CONFIG, value )
 	RPIO.output(CE, True)
 	
-def transmit(val):
-	data = val	
-	if type(val) == str:
-		data = []
-		for c in val:
-			data.append(c)	
-	if type(data) in (list, tuple) and len(data) > 32:
+def transmit(data):
+	
+	if type(data) in (list, tuple, str) and len(data) > 32:
 		print "err"
 		return
 		
