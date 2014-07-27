@@ -61,12 +61,15 @@ void EXTI1_IRQHandler(void){
 	uint8_t status = rfm73_register_read(RFM73_REG_STATUS);
 	if(status & (1 << 6)) //RX data
 	{
-		rfm73_receive(rx_buf, &length);
-		rfm73_register_write(RFM73_REG_STATUS, status);
-		
-		for(int i = 0; i < length; i++)
-			printf("%c", rx_buf[i]);
+			rfm73_receive(rx_buf, &length);
 	}
+	
+	if(status & (1 << 4)) //max_rt
+	{
+		//packet not sent
+	}
+	
+	rfm73_register_write(RFM73_REG_STATUS, status); //clear ints
 	
 	EXTI->PR |= EXTI_PR_PR1;	
 	GPIOE->ODR ^= GPIO_ODR_8;
@@ -88,9 +91,9 @@ int main(void)
 	if(rfm73_is_present())
 			GPIOE->ODR |= GPIO_ODR_9;
 	
-	rfm73_mode_receive();
+	rfm73_mode_transmit();
 
-
+	rfm73_transmit_message("asd",3);
     while(1)
     {
 	     

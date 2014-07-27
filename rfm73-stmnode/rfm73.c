@@ -48,7 +48,7 @@ void RFM73_WAIT_US(char a)
 // Bank0 register initialization values
 #define BANK0_ENTRIES 10
 const unsigned char Bank0_Reg[ BANK0_ENTRIES ][ 2 ]={
-   {  0, 0x3F }, // receive, enabled, CRC 2, enable interupts
+   {  0, 0x2F }, // receive, enabled, CRC 2, enable interupts
    {  1, 0x3F }, // auto-ack on all pipes enabled
    {  2, 0x03 }, // Enable pipes 0 and 1
    {  3, 0x03 }, // 5 bytes addresses

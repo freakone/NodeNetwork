@@ -5,12 +5,13 @@ from rfm73_defs import *
 
 CSN = 24 #GPIO pinu CSN
 CE = 7 #GPIO pinu CE
+IRQ = 25 #GPIO pinu IRQ
 spi = spidev.SpiDev() #inicjalizacja SPI
 
 RX0_Address = [0x34, 0x43, 0x10, 0x10, 0x01] #adres urzadzenia
 
 bank0_vals=[ #ustawienia modulu
-   [  0, 0x0F ], # receive, enabled, CRC 2, enable interupts
+   [  0, 0x2F ], # receive, enabled, CRC 2, enable RX MAX_RT interupts
    [  1, 0x3F ], # auto-ack on all pipes enabled
    [  2, 0x03 ], # Enable pipes 0 and 1
    [  3, 0x03 ], # 5 bytes addresses
@@ -73,13 +74,16 @@ def init_banks():
 	time.sleep(0.05)
    
 		
-def init():
-	RPIO.setup(25, RPIO.IN) #IRQ
+def init(callback):
+	RPIO.setup(IRQ, RPIO.IN) #IRQ
 	RPIO.setup(CSN, RPIO.OUT) #CSN
 	RPIO.setup(CE, RPIO.OUT) #CE
 	RPIO.output(CSN, True)
 	RPIO.output(CE, False)
 	spi.open(0,0) # wybieramy wolny CE na RPi, nie bedziemy z niego korzystac
+	
+	RPIO.add_interrupt_callback(IRQ, callback, edge='falling', pull_up_down=RPIO.PUD_OFF)
+	RPIO.wait_for_interrupts(threaded=True)
 	
 	
 def register_read(reg):
@@ -150,11 +154,9 @@ def transmit_mode():
 	RPIO.output(CE, True)
 	
 def transmit(data):
-	
 	if type(data) in (list, tuple, str) and len(data) > 32:
 		print "err"
-		return
-		
+		return		
 	register_write(RFM73_CMD_W_TX_PAYLOAD, data)
 	
 def next_pipe():
