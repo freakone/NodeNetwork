@@ -130,6 +130,19 @@ def is_alive():
 	print st1, st2
 	return ( st1 ^ st2 ) == 0x80
 	
+	
+def standby_mode():
+	RPIO.output(CE, False)
+	value = register_read( RFM73_REG_CONFIG )
+	value = value | 0x02 
+	register_write( RFM73_REG_CONFIG, value)
+	
+def powerdown_mode():
+	RPIO.output(CE, False)
+	value = register_read( RFM73_REG_CONFIG )
+	value = value & 0xFD 
+	register_write( RFM73_REG_CONFIG, value)
+	
 def receive_mode():
 	RPIO.output(CE, False)
 	register_write( RFM73_CMD_FLUSH_RX, 0 )
